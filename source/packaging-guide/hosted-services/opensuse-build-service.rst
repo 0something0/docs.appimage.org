@@ -43,19 +43,22 @@ This page describes how to use the public `openSUSE Build Service`_ instance. If
 
 * Once you have an account, log in using it and click on "Home Project" in the upper-right corner. Every user has a home project. Think if it as a collection of source code packages that you build AppImages (and possibly other types of packages) from. Later on, you can add additional projects, and invite collaborators to them
 
-
 Hello world
 ^^^^^^^^^^^
 
-On the https://build.opensuse.org/ homepage, click on "New Image".
+On your Home Project page, click on [New Image](https://build.opensuse.org/image_templates) 
+
+(annotation: Could increase intuitiveness by including a link directing to the user's home directory for ANY user, using cookies/server redirects/etc)
 
 .. Old image is available here:
     https://user-images.githubusercontent.com/2480569/26893574-00534da0-4bbc-11e7-82b2-24646c3d6ff0.png
 
 .. image:: /_static/img/packaging-guide/obs-new-image.png
-    :alt: "New Image" icon
+    :alt: "New Image" icon, on "Your Home Project" page, on the left hand sidebark on desktop, and within the bottom "Actions" tab on mobile 
 
-Then select AppImage, and click "Create Appliance".
+Then select AppImage, and click “Create Appliance” at bottom of the page.
+
+(annotation: Should we do Leap 15.1, Leap 15.2, or SLE12SP4?)
 
 .. Old image is available here:
     https://user-images.githubusercontent.com/2480569/26893577-00aac72e-4bbc-11e7-8fbf-457b3be82e19.png
@@ -63,15 +66,33 @@ Then select AppImage, and click "Create Appliance".
 .. image:: /_static/img/packaging-guide/obs-create-appliance.png
     :alt: Radio button: "Select template" (AppImage), input field: "Name your appliance", submit button: "Create Appliance"
 
-Done! An AppImage of Leafpad, a simple text editor, will be built. You can use this template as a starting point to customize for other applications.
+Done! An AppImage of xterm, a simple terminal emulator, will be built. You can use this template as a starting point to customize for other applications.
 
 The following sections describe how to do the same manually.
-
 
 Setting up an AppImage target for the project
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You need to tell OBS that for all source code packages in your home project you want to generate AppImages. To enable a target for AppImage, you can either use the command line tool :code:`osc meta prj -e ...` or use the OBS web interface:
+You need to tell OBS that for all source code packages in your home project you want to generate AppImages. To enable a target for AppImage, you can either use the graphical web interface, or edit the project meta manually.  
+
+(annotation: see 1.6, 1.7, 5.1 in OBS user guide)
+
+Graphical Web Interface
+^^^^^^^^^^^^^^^^^^^^^^^
+
+On your Home Project, go to the Repostiories section, click "Add From A Distribution" and find the AppImage checkbox.
+
+.. image:: /_static/img/packaging-guide/obs-new-image.png
+    :alt:  the AppImage checkbox, under the "Many Distributions" heading at the bottom of the page, represented by Tux the Penguin. 
+
+After the checkbox is filled in, OBS should automatically add the AppImage repository to your project.
+
+ (annotation: the documentation is better left ambigious than flat out wrong, so I'm not telling the user where to find the AppImage checkbox in case if it changes)
+
+Editing the Meta File
+^^^^^^^^^^^^^^^^^^^^^
+
+you can either use the command line tool :code:`osc meta prj -e ...` or use the OBS web interface:
 
 * Go to your home project
 * Click on "Advanced"
@@ -80,40 +101,29 @@ You need to tell OBS that for all source code packages in your home project you 
 
 .. code-block:: xml
 
-    <project name="home:probono">
-      <title>probono</title>
-      <description/>
-      <person userid="probono" role="maintainer"/>
-      <publish>
-        <enable/>
-        </publish>
-      <repository name="AppImage.arm">
-        <path project="home:probono" repository="openSUSE_13.1"/>
-        <path project="OBS:AppImage" repository="AppImage.arm"/>
-        <arch>armv7l</arch>
-        <arch>aarch64</arch>
-      </repository>
-      <repository name="AppImage">
-        <path project="home:probono" repository="openSUSE_13.1"/>
-        <path project="OBS:AppImage" repository="AppImage"/>
-        <arch>x86_64</arch>
-        <arch>i586</arch>
-      </repository>
-    </project>
+  <project name="home:username">
+    <title/>
+    <description/>
+   <person userid="username" role="maintainer"/>
+    <repository name="AppImage">
+      <path project="OBS:AppImage" repository="AppImage"/>
+      <arch>x86_64</arch>
+    </repository>
+  </project>
 
-
+(annotation: This seems to have changed, but I do not know if ARM is even supported anymore)
 .. note::
 
-    The :code:`AppImage.arm` repository is used for the ARM architectures for now. This will possibly change in the future.
+   The :code:`AppImage.arm` repository is used for the ARM architectures for now. This will possibly change in the future.
 
 
 Be sure to just insert the :code:`<repository>` tags into your existing file. For AppImage, we need to select one of the build targets that is built in your obs project. In the example above, please make sure to replace :code:`home:probono` with the actual name of the obs project where :code:`appimage.yml` should look for its resources - this can be the current project, and even RPMs created by the same package work as resources for AppImage.
 
-Also check if openSUSE_13.1 is still alive or use something slightly newer instead.
-
-
 Use native AppImage build support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+(annotation: refer to pkg2appimage docs https://docs.appimage.org/packaging-guide/converting-binary-packages/pkg2appimage.html )
+
 
 In order to build an AppImage you need to provide a file called :code:`appimage.yml`. OBS needs to get all the required resources before building. This is needed in order to be able to track changes and to find out whether a rebuild is needed, and to provide the resources in a secured and reproducible environment without network access.
 
